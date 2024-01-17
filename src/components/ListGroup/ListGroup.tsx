@@ -1,4 +1,5 @@
 import { useState } from "react";
+import styles from "./ListGroup.module.css";
 
 interface IPropsList {
   items: string[];
@@ -15,7 +16,7 @@ function ListGroup({ items, heading, onSelectItem }: IPropsList) {
     <>
       <h1>My list of {heading}</h1>
       {isEmptyList}
-      <ul className="list-group">
+      <ul className={["list-group", styles.container].join(" ")}>
         {items.map((item, index) => (
           <li
             onClick={() => {
@@ -25,7 +26,7 @@ function ListGroup({ items, heading, onSelectItem }: IPropsList) {
             key={index}
             className={
               selectedIndex === index
-                ? "list-group-item active"
+                ? ["list-group-item", styles.active].join(" ")
                 : "list-group-item"
             }
           >
