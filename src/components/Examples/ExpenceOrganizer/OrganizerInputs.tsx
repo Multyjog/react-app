@@ -1,42 +1,69 @@
-import { FormEvent, useRef } from "react";
+import { FieldValues, useForm } from "react-hook-form";
+import { z } from "zod";
+
+const validationSchema = z.object({
+  description: z.string().min(3),
+  amount: z.string(),
+  category: z.string(),
+});
+
+type IFormData = z.infer<typeof validationSchema>;
 
 const OrganizerInputs = () => {
-  const descriptionRef = useRef<HTMLInputElement>(null);
-  const amountRef = useRef<HTMLInputElement>(null);
-  const categoryRef = useRef<HTMLSelectElement>(null);
-  const expence = {
-    description: "",
-    amount: 0,
-    category: "",
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<IFormData>();
+
+  const onSubmit = (data: FieldValues) => {
+    console.log(data);
   };
-  const handleSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    expence.description = descriptionRef.current!.value;
-    expence.amount = parseInt(amountRef.current!.value);
-    expence.category = categoryRef.current!.value;
-    console.log(expence);
-  };
+
   return (
     <>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <div className="mb-3">
           <label htmlFor="description" className="form-label">
             Description
           </label>
           <input
-            ref={descriptionRef}
+            {...register("description", { required: true, minLength: 3 })}
+            placeholder="Enter expence description"
             id="description"
             type="text"
             className="form-control"
           />
+          {errors.description?.type === "required" && (
+            <p className="text-danger">The name field is required</p>
+          )}
+          {errors.description?.type === "minLength" && (
+            <p className="text-danger">
+              The name must be at least 3 characters
+            </p>
+          )}
         </div>
         <div className="mb-3">
-          <label className="form-label">Amount</label>
-          <input ref={amountRef} type="number" className="form-control" />
+          <label htmlFor="amount" className="form-label">
+            Amount
+          </label>
+          <input
+            {...register("amount", { required: true })}
+            placeholder="Enter the amount of money spent"
+            id="amount"
+            type="number"
+            className="form-control"
+          />
         </div>
         <div>
-          <label className="form-label">Category</label>
-          <select ref={categoryRef} className="form-select">
+          <label htmlFor="select" className="form-label">
+            Category
+          </label>
+          <select
+            {...register("category", { required: true })}
+            id="select"
+            className="form-select"
+          >
             <option defaultValue={0}>Choose category of expence</option>
             <option value="1">One</option>
             <option value="2">Two</option>
