@@ -1,23 +1,30 @@
-import { FieldValues, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+type IFormData = z.infer<typeof validationSchema>;
+interface IProps {
+  categories: { name: string; value: string }[];
+  onExpenceSubmit: (data: IFormData) => void;
+}
 
 const validationSchema = z.object({
-  description: z.string().min(3),
-  amount: z.string(),
+  description: z
+    .string()
+    .min(3, { message: "String must be at least 3 characters length" }),
+  amount: z.number({ invalid_type_error: "Age field is required" }).min(1),
   category: z.string(),
 });
 
-type IFormData = z.infer<typeof validationSchema>;
-
-const OrganizerInputs = () => {
+const OrganizerInputs = ({ onExpenceSubmit, categories }: IProps) => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
-  } = useForm<IFormData>();
+    formState: { errors, isValid },
+  } = useForm<IFormData>({ resolver: zodResolver(validationSchema) });
 
-  const onSubmit = (data: FieldValues) => {
-    console.log(data);
+  const onSubmit = (data: IFormData) => {
+    onExpenceSubmit(data);
   };
 
   return (
@@ -28,19 +35,14 @@ const OrganizerInputs = () => {
             Description
           </label>
           <input
-            {...register("description", { required: true, minLength: 3 })}
+            {...register("description")}
             placeholder="Enter expence description"
             id="description"
             type="text"
             className="form-control"
           />
-          {errors.description?.type === "required" && (
-            <p className="text-danger">The name field is required</p>
-          )}
-          {errors.description?.type === "minLength" && (
-            <p className="text-danger">
-              The name must be at least 3 characters
-            </p>
+          {errors.description && (
+            <p className="text-danger">{errors.description.message}</p>
           )}
         </div>
         <div className="mb-3">
@@ -48,29 +50,41 @@ const OrganizerInputs = () => {
             Amount
           </label>
           <input
-            {...register("amount", { required: true })}
-            placeholder="Enter the amount of money spent"
+            {...register("amount", { valueAsNumber: true })}
             id="amount"
             type="number"
             className="form-control"
+            placeholder="Enter the amount of money spent"
           />
+          {errors.amount && (
+            <p className="text-danger">{errors.amount.message}</p>
+          )}
         </div>
         <div>
           <label htmlFor="select" className="form-label">
             Category
           </label>
-          <select
-            {...register("category", { required: true })}
-            id="select"
-            className="form-select"
-          >
-            <option defaultValue={0}>Choose category of expence</option>
-            <option value="1">One</option>
-            <option value="2">Two</option>
-            <option value="3">Three</option>
+          <select {...register("category")} id="select" className="form-select">
+            <option defaultValue={""}>
+              Choose the category of your expence
+            </option>
+            {categories.map((el) => {
+              return (
+                <option key={el.value} value={el.value}>
+                  {el.name}
+                </option>
+              );
+            })}
           </select>
+          {errors.category && (
+            <p className="text-danger">{errors.category.message}</p>
+          )}
         </div>
-        <button type="submit" className="btn btn-primary mt-4">
+        <button
+          disabled={!isValid}
+          type="submit"
+          className="btn btn-primary mt-4"
+        >
           Submit
         </button>
       </form>

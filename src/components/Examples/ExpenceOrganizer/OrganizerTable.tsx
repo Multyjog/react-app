@@ -1,15 +1,53 @@
-const OrganizerTable = () => {
+import { IExpence, ICategory } from "./interfaces";
+
+interface IProps {
+  expencesList: IExpence[];
+  categoryToDisplay: ICategory;
+  categories: ICategory[];
+  onExpenceDelete: (data: IExpence) => void;
+  categoryChanged: (data: ICategory) => void;
+}
+
+const OrganizerTable = ({
+  expencesList,
+  categories,
+  onExpenceDelete,
+  categoryToDisplay,
+  categoryChanged,
+}: IProps) => {
+  const itemsToDisplay =
+    categoryToDisplay.value.length !== 0
+      ? expencesList.filter((el) => el.category === categoryToDisplay.value)
+      : expencesList;
+
+  const handleChange = (value: string) => {
+    if (value === "all") {
+      categoryChanged({ value: "", name: "" });
+      return;
+    }
+    const newCategoryItem = categories.find((el) => el.value === value);
+    if (newCategoryItem) categoryChanged(newCategoryItem);
+  };
+
   return (
     <>
-      <div>
+      <form className="mb-3">
         <label className="form-label">Category</label>
-        <select className="form-select">
-          <option defaultValue={0}>Choose category of expence</option>
-          <option value="1">One</option>
-          <option value="2">Two</option>
-          <option value="3">Three</option>
+        <select
+          onChange={(event) => handleChange(event.target.value)}
+          value={categoryToDisplay.value}
+          className="form-select"
+        >
+          <option value="all">All</option>
+          {categories.map((el) => {
+            return (
+              <option key={el.value} value={el.value}>
+                {el.name}
+              </option>
+            );
+          })}
         </select>
-      </div>
+      </form>
       <div>
         <table className="table table-striped">
           <thead>
@@ -21,12 +59,23 @@ const OrganizerTable = () => {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <th scope="row">1</th>
-              <td>Mark</td>
-              <td>Otto</td>
-              <td>@mdo</td>
-            </tr>
+            {itemsToDisplay.map((el) => {
+              return (
+                <tr key={el.id}>
+                  <td scope="row">{el.description}</td>
+                  <td>{el.amount} $</td>
+                  <td>{el.category}</td>
+                  <td>
+                    <button
+                      onClick={() => onExpenceDelete(el)}
+                      className="btn btn-danger"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
