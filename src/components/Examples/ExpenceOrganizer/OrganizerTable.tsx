@@ -28,7 +28,7 @@ const OrganizerTable = ({
     const newCategoryItem = categories.find((el) => el.value === value);
     if (newCategoryItem) categoryChanged(newCategoryItem);
   };
-
+  if (!expencesList.length) return null;
   return (
     <>
       <form className="mb-3">

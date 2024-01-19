@@ -2,7 +2,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-type IFormData = z.infer<typeof validationSchema>;
 interface IProps {
   categories: { name: string; value: string }[];
   onExpenceSubmit: (data: IFormData) => void;
@@ -12,12 +11,14 @@ const validationSchema = z.object({
   description: z
     .string()
     .min(3, { message: "String must be at least 3 characters length" }),
-  amount: z.number({ invalid_type_error: "Age field is required" }).min(1),
+  amount: z.number({ invalid_type_error: "Amount field is required" }).min(1),
   category: z.string(),
 });
+type IFormData = z.infer<typeof validationSchema>;
 
 const OrganizerInputs = ({ onExpenceSubmit, categories }: IProps) => {
   const {
+    reset,
     register,
     handleSubmit,
     formState: { errors, isValid },
@@ -25,6 +26,7 @@ const OrganizerInputs = ({ onExpenceSubmit, categories }: IProps) => {
 
   const onSubmit = (data: IFormData) => {
     onExpenceSubmit(data);
+    reset();
   };
 
   return (
